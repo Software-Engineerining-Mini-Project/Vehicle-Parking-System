@@ -7,8 +7,8 @@ A software-only parking management system that simulates vehicle entry/exit, par
 
 ## Team Members
 
-**Ananya V**: PES1UG24CS061
-**Amogh Sharma**: PES1UG24CS053 
+**Ananya V**: PES1UG24CS061  
+**Amogh Sharma**: PES1UG24CS053  
 **Nagaraja Gari Ram Sai Govind**: PES1UG24CS912 
 
 ## Key Features
