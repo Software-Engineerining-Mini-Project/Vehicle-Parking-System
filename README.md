@@ -5,6 +5,12 @@ A software-only parking management system that simulates vehicle entry/exit, par
 **Status:** In Development  
 **Documentation:** SRS v1.1 · Test Plan v1.0
 
+## Team Members
+
+**Ananya V**: PES1UG24CS061
+**Amogh Sharma**: PES1UG24CS053 
+**Nagaraja Gari Ram Sai Govind**: PES1UG24CS912 
+
 ## Key Features
 
 - **Slot Management:** Tracks vacant/occupied slots and slot categories.
