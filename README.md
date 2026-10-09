@@ -28,6 +28,21 @@ A parking management application that simulates real-world parking operations, f
 
 ## 🚀 Project Overview
 
+### Run the application
+
+Python 3.10 or newer is required.
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
+```
+
+The application starts at `http://127.0.0.1:5000`. On first start it creates
+`instance/parking.sqlite` and the initial SQLite schema. Set `SECRET_KEY` to a
+private value before using the application outside local development.
+
 Traditional parking management can involve manual slot assignment, inefficient space utilization, and limited visibility into parking occupancy. This project demonstrates how these operations can be managed through a centralized software application.
 
 The system provides a simulated parking environment in which vehicles can enter and exit, receive parking slots, generate tickets, pay calculated fees, and release occupied slots. It also incorporates intelligent slot assignment and predictive availability estimation.
