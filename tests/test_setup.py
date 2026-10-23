@@ -12,7 +12,7 @@ def db_path(tmp_path):
 
 @pytest.fixture
 def app(db_path):
-    return create_app({"TESTING": True, "DATABASE": db_path})
+    return create_app({"TESTING": True, "LOGIN_DISABLED": True, "DATABASE": db_path})
 
 
 def query(db_path, sql):
@@ -55,7 +55,7 @@ def test_data_survives_restart(app, db_path):
     con.commit()
     con.close()
 
-    create_app({"TESTING": True, "DATABASE": db_path})  # simulate a restart
+    create_app({"TESTING": True, "LOGIN_DISABLED": True, "DATABASE": db_path})  # simulate a restart
 
     assert query(db_path, "SELECT status FROM slots WHERE slot_id = 'S01'") == [("OCCUPIED",)]
     assert query(db_path, "SELECT COUNT(*) FROM slots") == [(20,)]

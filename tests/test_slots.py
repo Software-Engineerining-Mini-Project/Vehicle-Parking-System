@@ -5,7 +5,8 @@ from vps import create_app
 
 @pytest.fixture
 def client(tmp_path):
-    app = create_app({"TESTING": True, "DATABASE": str(tmp_path / "test.db")})
+    app = create_app({"TESTING": True, "LOGIN_DISABLED": True,
+                      "DATABASE": str(tmp_path / "test.db")})
     return app.test_client()
 
 

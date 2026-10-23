@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Not allowed - Vehicle Parking System{% endblock %}
+{% block content %}
+<h1>Not allowed</h1>
+<p class="error">{{ message }}</p>
+<p><a href="{{ url_for('index') }}">Back to the dashboard</a></p>
+{% endblock %}

@@ -91,3 +91,12 @@ th, td { text-align: left; padding: 6px 14px 6px 0; border-bottom: 1px solid #ec
 .legend { list-style: none; display: flex; flex-wrap: wrap; gap: 16px; padding: 0; margin: 16px 0 0; }
 .legend li { display: flex; align-items: center; gap: 6px; }
 .legend .cell { width: 18px; min-height: 18px; display: inline-block; }
+
+/* ---------- login / user menu ---------- */
+header nav { display: flex; align-items: center; }
+header .user { margin-left: 20px; color: #cbd2d9; font-size: 0.9rem; }
+header form.logout { margin: 0 0 0 12px; }
+header form.logout button { margin: 0; padding: 4px 10px; background: #33465c; }
+header { flex-wrap: wrap; gap: 8px; }
+header nav { flex-wrap: wrap; }
+header nav a, header .user { white-space: nowrap; }

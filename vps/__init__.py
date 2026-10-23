@@ -3,7 +3,7 @@ import os
 
 from flask import Flask, render_template
 
-from . import db, parking, slots
+from . import auth, db, parking, slots
 
 
 def create_app(test_config=None):
@@ -17,10 +17,12 @@ def create_app(test_config=None):
 
     os.makedirs(app.instance_path, exist_ok=True)
     db.init_app(app)
+    app.register_blueprint(auth.bp)
     app.register_blueprint(parking.bp)
     app.register_blueprint(slots.bp)
 
     @app.route("/")
+    @auth.login_required
     def index():
         return render_template("index.html")
 
