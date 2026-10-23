@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Vehicle Exit - Vehicle Parking System{% endblock %}
+{% block content %}
+<h1>Vehicle Exit</h1>
+
+<form method="post" class="card" novalidate>
+    <label for="ticket_id">Ticket ID</label>
+    <input id="ticket_id" name="ticket_id" value="{{ form.get('ticket_id', '') }}"
+           placeholder="e.g. VPS-20261023-0001" autocomplete="off" autofocus>
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <button type="submit">Calculate Fee</button>
+</form>
+
+{% if quote %}
+<section class="card">
+    <h2>Ticket {{ quote.ticket_id }}</h2>
+    <table>
+        <tr><th>Plate</th><td>{{ quote.plate_number }}</td></tr>
+        <tr><th>Vehicle type</th><td>{{ vehicle_types[quote.vehicle_type] }}</td></tr>
+        <tr><th>Slot</th><td>{{ quote.slot_id }}</td></tr>
+        <tr><th>Entry time</th><td>{{ quote.entry_time }}</td></tr>
+        <tr><th>Exit time</th><td>{{ quote.exit_time }}</td></tr>
+        <tr><th>Duration</th><td>{{ quote.duration }}</td></tr>
+        {% if quote.billable_hours %}
+        <tr><th>Charge</th><td>{{ quote.billable_hours }} started hour{{ 's' if quote.billable_hours > 1 }} x Rs. {{ quote.hourly_rate }}</td></tr>
+        {% else %}
+        <tr><th>Charge</th><td>Within the {{ quote.grace_minutes }}-minute grace period</td></tr>
+        {% endif %}
+        <tr><th>Fee</th><td class="fee">Rs. {{ quote.fee }}</td></tr>
+    </table>
+</section>
+{% endif %}
+{% endblock %}
