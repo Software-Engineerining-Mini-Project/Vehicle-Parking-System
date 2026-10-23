@@ -1,4 +1,4 @@
-"""Vehicle entry: validation, slot assignment and ticket creation (REQ-LOG-01 to 04)."""
+"""Vehicle entry and exit (REQ-LOG-01 to 04, REQ-PAY-01)."""
 import re
 import sqlite3
 
@@ -6,7 +6,7 @@ import qrcode
 import qrcode.image.svg
 from flask import Blueprint, Response, abort, jsonify, render_template, request
 
-from . import clock
+from . import clock, fees
 from .db import get_db
 from .grid import assign_slot
 
@@ -113,6 +113,55 @@ def get_ticket(db, ticket_id):
     return dict(row)
 
 
+def quote_exit(db, ticket_id):
+    """Work out the parking duration and fee for an active ticket.
+
+    The ticket stays open: it is closed only after the mock payment succeeds
+    (Design Spec 4.3, PAYMENT_FAILED rule), using close_ticket().
+    """
+    if not ticket_id.strip():
+        raise ParkingError(400, "MISSING_TICKET_ID", "Enter the ticket ID.")
+    ticket = get_ticket(db, ticket_id)
+    if ticket["status"] != "ACTIVE":
+        raise ParkingError(409, "TICKET_CLOSED",
+                           f"Ticket {ticket['ticket_id']} has already exited.")
+    exit_time = clock.now(db)
+    seconds = max(0, (exit_time - clock.from_text(ticket["entry_time"])).total_seconds())
+    rate, grace = fees.load_tariff(db, ticket["vehicle_type"])
+    hours = fees.billable_hours(seconds, grace)
+    ticket.update(
+        exit_time=clock.to_text(exit_time),
+        duration_seconds=int(seconds),
+        duration=fees.format_duration(seconds),
+        hourly_rate=rate,
+        grace_minutes=grace,
+        billable_hours=hours,
+        fee=hours * rate,
+    )
+    return ticket
+
+
+def close_ticket(db, ticket_id, exit_time):
+    """Close a paid ticket, free its slot and keep the stay for wait-time prediction."""
+    ticket = get_ticket(db, ticket_id)
+    if ticket["status"] != "ACTIVE":
+        raise ParkingError(409, "TICKET_CLOSED",
+                           f"Ticket {ticket['ticket_id']} has already exited.")
+    entered = clock.from_text(ticket["entry_time"])
+    left = clock.from_text(exit_time)
+    with db:
+        db.execute("UPDATE tickets SET status = 'CLOSED', exit_time = ? WHERE ticket_id = ?",
+                   (exit_time, ticket["ticket_id"]))
+        db.execute("UPDATE slots SET status = 'VACANT' WHERE slot_id = ?", (ticket["slot_id"],))
+        db.execute(
+            "INSERT INTO dwell_history (vehicle_type, entry_time, exit_time, duration_min)"
+            " VALUES (?, ?, ?, ?)",
+            (ticket["vehicle_type"], ticket["entry_time"], exit_time,
+             int((left - entered).total_seconds() // 60)),
+        )
+    return get_ticket(db, ticket_id)
+
+
 def qr_svg(text):
     image = qrcode.make(text, image_factory=qrcode.image.svg.SvgPathImage, box_size=10)
     return image.to_string(encoding="unicode")
@@ -133,6 +182,15 @@ def api_entry():
     except ParkingError as err:
         return error_response(err)
     return jsonify(ticket), 201
+
+
+@bp.post("/api/parking/exit")
+def api_exit():
+    data = request.get_json(silent=True) or request.form
+    try:
+        return jsonify(quote_exit(get_db(), data.get("ticket_id") or ""))
+    except ParkingError as err:
+        return error_response(err)
 
 
 @bp.get("/api/parking/<ticket_id>")
@@ -168,4 +226,18 @@ def entry_page():
         except ParkingError as err:
             error, status = err.message, err.status
     return render_template("entry.html", ticket=ticket, error=error, form=form,
+                           vehicle_types=VEHICLE_TYPES), status
+
+
+@bp.route("/exit", methods=["GET", "POST"])
+def exit_page():
+    quote = error = None
+    status = 200
+    form = request.form
+    if request.method == "POST":
+        try:
+            quote = quote_exit(get_db(), form.get("ticket_id") or "")
+        except ParkingError as err:
+            error, status = err.message, err.status
+    return render_template("exit.html", quote=quote, error=error, form=form,
                            vehicle_types=VEHICLE_TYPES), status
