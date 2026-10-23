@@ -1,11 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Dashboard</h1>
-<p>Slots by category in the current layout.</p>
-<table>
-    <tr><th>Category</th><th>Total</th><th>Vacant</th></tr>
-    {% for row in rows %}
-    <tr><td>{{ row.category.replace('_', '-').title() }}</td><td>{{ row.total }}</td><td>{{ row.vacant }}</td></tr>
-    {% endfor %}
-</table>
+{% include "_slot_panel.html" %}
 {% endblock %}

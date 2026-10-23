@@ -3,7 +3,7 @@ import os
 
 from flask import Flask, render_template
 
-from . import db, parking
+from . import db, parking, slots
 
 
 def create_app(test_config=None):
@@ -18,14 +18,10 @@ def create_app(test_config=None):
     os.makedirs(app.instance_path, exist_ok=True)
     db.init_app(app)
     app.register_blueprint(parking.bp)
+    app.register_blueprint(slots.bp)
 
     @app.route("/")
     def index():
-        rows = db.get_db().execute(
-            "SELECT category, COUNT(*) AS total,"
-            " SUM(status = 'VACANT') AS vacant"
-            " FROM slots GROUP BY category ORDER BY category"
-        ).fetchall()
-        return render_template("index.html", rows=rows)
+        return render_template("index.html")
 
     return app

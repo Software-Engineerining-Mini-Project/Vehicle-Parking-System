@@ -37,4 +37,6 @@
     <img class="qr" src="{{ url_for('parking.ticket_qr', ticket_id=ticket.ticket_id) }}" alt="QR code for ticket {{ ticket.ticket_id }}">
 </section>
 {% endif %}
+
+{% with highlight = ticket.slot_id if ticket else None %}{% include "_slot_panel.html" %}{% endwith %}
 {% endblock %}
