@@ -7,11 +7,14 @@ A parking management application that simulates real-world parking operations, f
 ![Status](https://img.shields.io/badge/Status-In%20Development-orange)
 ![Platform](https://img.shields.io/badge/Platform-Local%20Simulation-blue)
 ![Documentation](https://img.shields.io/badge/Documentation-Available-brightgreen)
+[![CI](https://github.com/Software-Engineerining-Mini-Project/Vehicle-Parking-System/actions/workflows/ci.yml/badge.svg)](https://github.com/Software-Engineerining-Mini-Project/Vehicle-Parking-System/actions/workflows/ci.yml)
 
 ---
 
 ## 📌 Table of Contents
 
+- [Getting Started](#️-getting-started)
+- [Project Structure](#-project-structure)
 - [Project Overview](#-project-overview)
 - [Objectives](#-objectives)
 - [Key Features](#-key-features)
@@ -25,6 +28,61 @@ A parking management application that simulates real-world parking operations, f
 - [Documentation](#-documentation)
 - [Future Enhancements](#-future-enhancements)
 - [Team Members](#-team-members)
+
+## 🛠️ Getting Started
+
+Requires **Python 3.10 or newer**. Works on Windows, macOS and Linux.
+
+```bash
+git clone https://github.com/Software-Engineerining-Mini-Project/Vehicle-Parking-System.git
+cd Vehicle-Parking-System
+python -m pip install -r requirements.txt
+python run.py
+```
+
+Open **http://localhost:5000**. On the first run the app creates `instance/vps.db` with the default
+6 × 8 layout (20 slots) and two demo accounts:
+
+| Role | Username | Password |
+|---|---|---|
+| Administrator | `admin` | `admin123` |
+| Attendant | `attendant` | `attend123` |
+
+Demo passwords can be changed before the first run with the `VPS_ADMIN_PASSWORD` and
+`VPS_ATTENDANT_PASSWORD` environment variables. Delete the `instance` folder to start again
+with a fresh database.
+
+### Running the tests
+
+```bash
+python -m pytest        # unit and integration tests
+python -m flake8 .      # code style
+```
+
+GitHub Actions runs both on every pull request, on Ubuntu and Windows with Python 3.10 and 3.12.
+
+## 📁 Project Structure
+
+```
+Vehicle-Parking-System/
+├── run.py                  # starts the app
+├── requirements.txt
+├── vps/
+│   ├── __init__.py         # Flask application factory
+│   ├── schema.sql          # SQLite tables
+│   ├── seed.py             # default layout, rates and demo accounts
+│   ├── db.py               # database connection and first-run setup
+│   ├── grid.py             # facility grid and BFS slot assignment
+│   ├── parking.py          # vehicle entry and exit, tickets and QR codes
+│   ├── fees.py             # fee and grace-period rules
+│   ├── slots.py            # slot categories and live slot grid
+│   ├── clock.py            # application time (Demo Clock)
+│   ├── templates/          # HTML screens
+│   └── static/             # CSS and JavaScript
+├── tests/                  # pytest test suite
+├── docs/                   # SRS, Test Plan, Design Spec, sprint documents
+└── .github/workflows/      # GitHub Actions CI
+```
 
 ## 🚀 Project Overview
 
