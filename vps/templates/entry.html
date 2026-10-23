@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Vehicle Entry - Vehicle Parking System{% endblock %}
+{% block content %}
+<h1>Vehicle Entry</h1>
+
+<form method="post" class="card" novalidate>
+    <label for="plate">Plate number</label>
+    <input id="plate" name="plate" value="{{ form.get('plate', '') }}" placeholder="e.g. KA01AB1234"
+           maxlength="20" autocomplete="off" autofocus>
+
+    <label for="vehicle_type">Vehicle type</label>
+    <select id="vehicle_type" name="vehicle_type">
+        {% for value, label in vehicle_types.items() %}
+        <option value="{{ value }}" {% if form.get('vehicle_type', 'CAR') == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+
+    <label class="inline"><input type="checkbox" name="accessible" {% if form.get('accessible') %}checked{% endif %}> Needs an accessible slot</label>
+
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <button type="submit">Simulate Entry</button>
+</form>
+
+{% if ticket %}
+<section class="card ticket">
+    <div>
+        <h2>Ticket {{ ticket.ticket_id }}</h2>
+        <table>
+            <tr><th>Plate</th><td>{{ ticket.plate_number }}</td></tr>
+            <tr><th>Vehicle type</th><td>{{ vehicle_types[ticket.vehicle_type] }}</td></tr>
+            <tr><th>Assigned slot</th><td><strong>{{ ticket.slot_id }}</strong> ({{ ticket.category.replace('_', '-').title() }})</td></tr>
+            <tr><th>Entry time</th><td>{{ ticket.entry_time }}</td></tr>
+            <tr><th>Route</th><td>{{ ticket.path | length - 1 }} steps from the entrance</td></tr>
+            <tr><th>Gate</th><td class="gate">OPEN</td></tr>
+        </table>
+    </div>
+    <img class="qr" src="{{ url_for('parking.ticket_qr', ticket_id=ticket.ticket_id) }}" alt="QR code for ticket {{ ticket.ticket_id }}">
+</section>
+{% endif %}
+{% endblock %}
