@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Receipt - Vehicle Parking System{% endblock %}
+{% block content %}
+<h1>Payment Receipt</h1>
+<section class="card receipt">
+    <p class="paid">Payment successful (mock) &mdash; Gate: <span class="gate">{{ receipt.gate }}</span></p>
+    <table>
+        <tr><th>Reference</th><td>{{ receipt.reference }}</td></tr>
+        <tr><th>Ticket</th><td>{{ receipt.ticket_id }}</td></tr>
+        <tr><th>Plate</th><td>{{ receipt.plate_number }}</td></tr>
+        <tr><th>Vehicle type</th><td>{{ vehicle_types[receipt.vehicle_type] }}</td></tr>
+        <tr><th>Slot</th><td>{{ receipt.slot_id }} (now vacant)</td></tr>
+        <tr><th>Entry time</th><td>{{ receipt.entry_time }}</td></tr>
+        <tr><th>Exit time</th><td>{{ receipt.exit_time }}</td></tr>
+        <tr><th>Duration</th><td>{{ receipt.duration }}</td></tr>
+        <tr><th>Rate</th><td>Rs. {{ receipt.hourly_rate }} per started hour ({{ receipt.billable_hours }} charged)</td></tr>
+        <tr><th>Amount paid</th><td class="fee">Rs. {{ receipt.amount }}</td></tr>
+    </table>
+    <button type="button" onclick="window.print()">Print receipt</button>
+</section>
+<p><a href="{{ url_for('parking.exit_page') }}">Next exit</a></p>
+{% endblock %}

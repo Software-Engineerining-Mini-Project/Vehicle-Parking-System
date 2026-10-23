@@ -28,6 +28,10 @@
         {% endif %}
         <tr><th>Fee</th><td class="fee">Rs. {{ quote.fee }}</td></tr>
     </table>
+    <form method="post" action="{{ url_for('payment.pay_page') }}">
+        <input type="hidden" name="ticket_id" value="{{ quote.ticket_id }}">
+        <button type="submit">Pay (Mock) Rs. {{ quote.fee }}</button>
+    </form>
 </section>
 {% endif %}
 {% endblock %}
