@@ -164,6 +164,7 @@ def entry_page():
             ticket = register_entry(get_db(), form.get("plate"), form.get("vehicle_type"),
                                     is_checked(form.get("accessible")))
             status = 201
+            form = {}  # clear the form so the same vehicle is not submitted twice
         except ParkingError as err:
             error, status = err.message, err.status
     return render_template("entry.html", ticket=ticket, error=error, form=form,
