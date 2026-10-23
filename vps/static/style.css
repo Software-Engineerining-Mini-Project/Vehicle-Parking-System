@@ -60,3 +60,34 @@ th, td { text-align: left; padding: 6px 14px 6px 0; border-bottom: 1px solid #ec
 .ticket h2 { margin-top: 0; }
 .qr { width: 160px; height: 160px; }
 .gate { font-weight: 700; color: #067647; }
+
+/* ---------- live slot grid ---------- */
+.slot-panel h2 { margin-top: 0; }
+.slot-counts table { margin-bottom: 16px; }
+.slot-counts .full { color: #b42318; font-weight: 700; }
+
+.slot-grid { display: grid; gap: 4px; max-width: 640px; }
+
+.cell {
+    min-height: 52px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.cell.WALL { background: #3b4350; }
+.cell.ROAD { background: #e4e7eb; }
+.cell.ENTRANCE, .cell.EXIT { background: #1f2a37; color: #fff; font-weight: 700; }
+.cell.slot { border: 2px solid transparent; }
+.cell.slot.VACANT { background: #d1fadf; border-color: #32d583; }
+.cell.slot.OCCUPIED { background: #fee4e2; border-color: #f97066; }
+.cell.slot.RESERVED { background: #fef0c7; border-color: #fdb022; }
+.cell.slot.assigned { outline: 3px solid #1f2a37; outline-offset: 1px; }
+.cell small { opacity: 0.75; }
+
+.legend { list-style: none; display: flex; flex-wrap: wrap; gap: 16px; padding: 0; margin: 16px 0 0; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend .cell { width: 18px; min-height: 18px; display: inline-block; }
