@@ -100,3 +100,13 @@ header form.logout button { margin: 0; padding: 4px 10px; background: #33465c; }
 header { flex-wrap: wrap; gap: 8px; }
 header nav { flex-wrap: wrap; }
 header nav a, header .user { white-space: nowrap; }
+
+/* ---------- payment ---------- */
+.receipt .paid { font-weight: 600; }
+.fee { font-weight: 700; }
+.admin-panel h2 { margin-top: 0; }
+
+@media print {
+    header, button, main > p { display: none; }
+    .card { border: 0; }
+}

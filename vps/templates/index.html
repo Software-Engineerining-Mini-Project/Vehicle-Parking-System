@@ -1,5 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Dashboard</h1>
+{% if current_user and current_user.role == 'ADMIN' %}
+<section class="card admin-panel">
+    <h2>Mock payment gateway</h2>
+    {% set failing = payment_force_failure() %}
+    <p>Status: <strong>{{ 'Forced failure (every payment fails)' if failing else 'Normal (payments succeed)' }}</strong></p>
+    <form method="post" action="{{ url_for('payment.payment_mode_page') }}">
+        <input type="hidden" name="force_failure" value="{{ '0' if failing else '1' }}">
+        <button type="submit">{{ 'Back to normal' if failing else 'Force failure' }}</button>
+    </form>
+</section>
+{% endif %}
 {% include "_slot_panel.html" %}
 {% endblock %}
