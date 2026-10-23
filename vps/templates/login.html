@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Log in - Vehicle Parking System{% endblock %}
+{% block content %}
+<h1>Staff Login</h1>
+<form method="post" class="card" novalidate>
+    <label for="username">Username</label>
+    <input id="username" name="username" autocomplete="username" value="{{ request.form.get('username', '') }}" autofocus>
+
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password">
+
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <button type="submit">Log in</button>
+</form>
+{% endblock %}

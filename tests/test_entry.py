@@ -15,7 +15,7 @@ def db_path(tmp_path):
 
 @pytest.fixture
 def client(db_path):
-    return create_app({"TESTING": True, "DATABASE": db_path}).test_client()
+    return create_app({"TESTING": True, "LOGIN_DISABLED": True, "DATABASE": db_path}).test_client()
 
 
 def enter(client, plate="KA01AB1234", vehicle_type="CAR", **extra):

@@ -7,6 +7,7 @@ import qrcode.image.svg
 from flask import Blueprint, Response, abort, jsonify, render_template, request
 
 from . import clock, fees
+from .auth import login_required
 from .db import get_db
 from .grid import assign_slot
 
@@ -174,6 +175,7 @@ def error_response(err):
 # ---------- JSON API (Design Spec section 4.2) ----------
 
 @bp.post("/api/parking/entry")
+@login_required
 def api_entry():
     data = request.get_json(silent=True) or request.form
     try:
@@ -185,6 +187,7 @@ def api_entry():
 
 
 @bp.post("/api/parking/exit")
+@login_required
 def api_exit():
     data = request.get_json(silent=True) or request.form
     try:
@@ -194,6 +197,7 @@ def api_exit():
 
 
 @bp.get("/api/parking/<ticket_id>")
+@login_required
 def api_ticket(ticket_id):
     try:
         return jsonify(get_ticket(get_db(), ticket_id))
@@ -202,6 +206,7 @@ def api_ticket(ticket_id):
 
 
 @bp.get("/tickets/<ticket_id>/qr.svg")
+@login_required
 def ticket_qr(ticket_id):
     try:
         ticket = get_ticket(get_db(), ticket_id)
@@ -213,6 +218,7 @@ def ticket_qr(ticket_id):
 # ---------- Attendant screens ----------
 
 @bp.route("/entry", methods=["GET", "POST"])
+@login_required
 def entry_page():
     ticket = error = None
     status = 200
@@ -230,6 +236,7 @@ def entry_page():
 
 
 @bp.route("/exit", methods=["GET", "POST"])
+@login_required
 def exit_page():
     quote = error = None
     status = 200

@@ -1,6 +1,7 @@
 """Slot categories, live slot grid and vacant counts (REQ-SLOT-01 to 03)."""
 from flask import Blueprint, jsonify, render_template, request
 
+from .auth import login_required, role_required
 from .db import get_db
 from .grid import load_grid
 
@@ -61,12 +62,14 @@ def set_reserved(db, slot_id, reserved):
 
 
 @bp.get("/api/slots")
+@login_required
 def api_slots():
     return jsonify(slot_summary(get_db(), request.args.get("category"),
                                 request.args.get("status")))
 
 
 @bp.post("/api/slots/<slot_id>/reserve")
+@role_required("ADMIN")
 def api_reserve(slot_id):
     data = request.get_json(silent=True) or {}
     body, status = set_reserved(get_db(), slot_id.upper(), bool(data.get("reserved", True)))
@@ -74,5 +77,6 @@ def api_reserve(slot_id):
 
 
 @bp.get("/slots")
+@login_required
 def slots_page():
     return render_template("slots.html")

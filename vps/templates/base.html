@@ -10,10 +10,18 @@
     <header>
         <a class="brand" href="{{ url_for('index') }}">Vehicle Parking System</a>
         <nav>
+            {% if current_user %}
             <a href="{{ url_for('index') }}">Home</a>
             <a href="{{ url_for('parking.entry_page') }}">Vehicle Entry</a>
             <a href="{{ url_for('parking.exit_page') }}">Vehicle Exit</a>
             <a href="{{ url_for('slots.slots_page') }}">Slot Grid</a>
+            <span class="user">{{ current_user.username }} ({{ role_labels[current_user.role] }})</span>
+            <form method="post" action="{{ url_for('auth.logout') }}" class="logout">
+                <button type="submit">Log out</button>
+            </form>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}">Log in</a>
+            {% endif %}
         </nav>
     </header>
     <main>
