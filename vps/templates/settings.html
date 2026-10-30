@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Settings - Vehicle Parking System{% endblock %}
+{% block content %}
+<h1>Admin Settings</h1>
+{% if error %}<p class="card error" role="alert">{{ error }}</p>{% endif %}
+{% if message %}<p class="card notice" role="status">{{ message }}</p>{% endif %}
+
+<form method="post" action="{{ url_for('admin.update_settings') }}" class="card" novalidate>
+    <h2>Rates and grace period</h2>
+    {% for field in fields %}
+    <label for="{{ field.key }}">{{ field.label }}</label>
+    <input id="{{ field.key }}" name="{{ field.key }}" type="number" min="{{ field.low }}" max="{{ field.high }}" value="{{ field.value }}">
+    {% endfor %}
+    <button type="submit">Save Settings</button>
+</form>
+
+<form method="post" action="{{ url_for('admin.update_layout') }}" class="card layout-form" novalidate>
+    <h2>Facility layout</h2>
+    <p># wall, . road, N entrance, X exit, S01 existing slot, S21:CAR new slot
+       (categories CAR, TWO_WHEELER, ACCESSIBLE, EV). Maximum 10 x 10.</p>
+    <label for="layout">Grid</label>
+    <textarea id="layout" name="layout" rows="10" spellcheck="false">{{ layout }}</textarea>
+    <button type="submit">Save Layout</button>
+</form>
+
+<form method="post" action="{{ url_for('admin.reserve_slot') }}" class="card" novalidate>
+    <h2>Reserve a slot</h2>
+    <label for="slot_id">Slot</label>
+    <select id="slot_id" name="slot_id">
+        {% for slot in slots %}
+        <option value="{{ slot.slot_id }}">{{ slot.slot_id }} ({{ slot.status.title() }})</option>
+        {% endfor %}
+    </select>
+    <div class="button-row">
+        <button type="submit" name="reserved" value="1">Reserve</button>
+        <button type="submit" name="reserved" value="0" class="secondary">Release</button>
+    </div>
+</form>
+{% endblock %}
