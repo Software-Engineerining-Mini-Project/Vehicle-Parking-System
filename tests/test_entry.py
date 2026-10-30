@@ -36,10 +36,10 @@ def test_entry_creates_ticket_and_occupies_slot(client, db_path):
     assert response.status_code == 201
     ticket = response.get_json()
     assert TICKET_PATTERN.match(ticket["ticket_id"])
-    assert ticket["slot_id"] == "S04"
+    assert ticket["slot_id"] == "S01"
     assert ticket["status"] == "ACTIVE"
     assert ticket["path"][0] == [1, 0]
-    assert query(db_path, "SELECT status FROM slots WHERE slot_id = 'S04'") == [("OCCUPIED",)]
+    assert query(db_path, "SELECT status FROM slots WHERE slot_id = 'S01'") == [("OCCUPIED",)]
 
 
 def test_plate_is_normalised(client):
@@ -98,8 +98,8 @@ def test_vehicles_get_slots_of_their_own_category(client):
 
 
 def test_next_car_gets_next_nearest_slot(client):
-    assert enter(client, plate="CAR0001").get_json()["slot_id"] == "S04"
-    assert enter(client, plate="CAR0002").get_json()["slot_id"] == "S10"
+    assert enter(client, plate="CAR0001").get_json()["slot_id"] == "S01"
+    assert enter(client, plate="CAR0002").get_json()["slot_id"] == "S02"
 
 
 def test_full_category_returns_no_slot_available(client):
@@ -131,7 +131,7 @@ def test_entry_page_shows_ticket(client):
     response = client.post("/entry", data={"plate": "KA01AB1234", "vehicle_type": "CAR"})
     assert response.status_code == 201
     page = response.get_data(as_text=True)
-    assert "Ticket VPS-" in page and "S04" in page and "OPEN" in page
+    assert "Ticket VPS-" in page and "S01" in page and "OPEN" in page
 
 
 def test_entry_page_shows_error_next_to_form(client):

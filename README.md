@@ -45,8 +45,8 @@ Open **http://localhost:5000**. On the first run the app creates `instance/vps.d
 
 | Role | Username | Password |
 |---|---|---|
-| Administrator | `admin` | `admin123` |
-| Attendant | `attendant` | `attend123` |
+| Administrator | `admin` | `Admin@123` |
+| Attendant | `attendant` | `Attend@123` |
 
 Demo passwords can be changed before the first run with the `VPS_ADMIN_PASSWORD` and
 `VPS_ATTENDANT_PASSWORD` environment variables. Delete the `instance` folder to start again

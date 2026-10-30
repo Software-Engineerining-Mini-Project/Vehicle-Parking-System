@@ -3,20 +3,31 @@ import os
 
 from werkzeug.security import generate_password_hash
 
-# Default 6 x 8 facility layout.
+# Default 6 x 8 facility layout (OR-01). Numbers are slot IDs; the numbering is the one
+# the Test Plan uses: S01-S10 Car, S11-S14 Two-Wheeler, S15-S16 Accessible, S17-S20 EV.
 #   # wall   . road   N entrance   X exit
-#   C car   T two-wheeler   A accessible   V EV
 LAYOUT = [
-    "#ATTCCC#",
-    "N.......",
-    "#ATTC##.",
-    "#CCCC##.",
-    "#......X",
-    "#CCVVVV#",
+    "#  01 02 03 04 05 06 #",
+    "N  .  .  .  .  .  .  .",
+    "#  11 12 13 14 #  #  .",
+    "#  20 19 18 17 #  #  .",
+    "#  .  .  .  .  .  .  X",
+    "#  16 15 07 08 09 10 #",
 ]
 
-SLOT_CATEGORIES = {"C": "CAR", "T": "TWO_WHEELER", "A": "ACCESSIBLE", "V": "EV"}
 OTHER_CELLS = {"#": "WALL", ".": "ROAD", "N": "ENTRANCE", "X": "EXIT"}
+
+
+def slot_category(number):
+    """Return the default category of a slot number."""
+    if number <= 10:
+        return "CAR"
+    if number <= 14:
+        return "TWO_WHEELER"
+    if number <= 16:
+        return "ACCESSIBLE"
+    return "EV"
+
 
 DEFAULT_SETTINGS = {
     "rate_two_wheeler": "20",
@@ -30,19 +41,17 @@ DEFAULT_SETTINGS = {
 
 def seed_demo_data(db):
     """Insert the default layout, slots, settings and the two demo accounts."""
-    slot_no = 0
     for row_no, line in enumerate(LAYOUT):
-        for col_no, char in enumerate(line):
-            if char in SLOT_CATEGORIES:
-                slot_no += 1
-                slot_id = f"S{slot_no:02d}"
+        for col_no, token in enumerate(line.split()):
+            if token.isdigit():
+                slot_id = f"S{token}"
                 db.execute(
                     "INSERT INTO slots (slot_id, category) VALUES (?, ?)",
-                    (slot_id, SLOT_CATEGORIES[char]),
+                    (slot_id, slot_category(int(token))),
                 )
                 cell = ("SLOT", slot_id)
             else:
-                cell = (OTHER_CELLS[char], None)
+                cell = (OTHER_CELLS[token], None)
             db.execute(
                 "INSERT INTO grid_cells (row_no, col_no, cell_type, slot_id)"
                 " VALUES (?, ?, ?, ?)",
@@ -55,8 +64,8 @@ def seed_demo_data(db):
 
     # Demo passwords can be overridden through environment variables.
     accounts = [
-        ("admin", os.environ.get("VPS_ADMIN_PASSWORD", "admin123"), "ADMIN"),
-        ("attendant", os.environ.get("VPS_ATTENDANT_PASSWORD", "attend123"), "ATTENDANT"),
+        ("admin", os.environ.get("VPS_ADMIN_PASSWORD", "Admin@123"), "ADMIN"),
+        ("attendant", os.environ.get("VPS_ATTENDANT_PASSWORD", "Attend@123"), "ATTENDANT"),
     ]
     for username, password, role in accounts:
         db.execute(

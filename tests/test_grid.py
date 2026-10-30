@@ -103,17 +103,25 @@ def test_default_layout_loads_from_database(db):
 
 def test_assign_slot_on_default_layout(db):
     _, con = db
-    # S01 and S07 are both 2 steps from the entrance; the lower number wins
-    assert assign_slot(con, "CAR", accessible=True)[0] == "S01"
-    assert assign_slot(con, "CAR")[0] == "S04"
-    assert assign_slot(con, "TWO_WHEELER")[0] == "S02"
-    # EV bays are reached from the far road, so S20 (nearest the exit lane) is closest
-    assert assign_slot(con, "EV")[0] == "S20"
+    # Test Plan TC-01 and TC-03: nearest slot of each category
+    assert assign_slot(con, "CAR", accessible=True)[0] == "S15"
+    assert assign_slot(con, "CAR")[0] == "S01"
+    assert assign_slot(con, "TWO_WHEELER")[0] == "S11"
+    assert assign_slot(con, "EV")[0] == "S17"
+
+
+def test_test_plan_tc04_paths(db):
+    # S01 and S02 occupied: S03 is 4 steps from the entrance, S10 is nearest the exit
+    _, con = db
+    con.execute("UPDATE slots SET status = 'OCCUPIED' WHERE slot_id IN ('S01', 'S02')")
+    slot_id, path = assign_slot(con, "CAR")
+    assert slot_id == "S03" and len(path) - 1 == 4
+    assert assign_slot(con, "CAR", start_from="EXIT")[0] == "S10"
 
 
 def test_assign_slot_skips_occupied_and_reports_full(db):
     _, con = db
-    con.execute("UPDATE slots SET status = 'OCCUPIED' WHERE slot_id = 'S04'")
-    assert assign_slot(con, "CAR")[0] == "S10"
+    con.execute("UPDATE slots SET status = 'OCCUPIED' WHERE slot_id = 'S01'")
+    assert assign_slot(con, "CAR")[0] == "S02"
     con.execute("UPDATE slots SET status = 'OCCUPIED' WHERE category = 'EV'")
     assert assign_slot(con, "EV") is None

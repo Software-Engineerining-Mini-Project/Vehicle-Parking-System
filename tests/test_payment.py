@@ -53,7 +53,7 @@ def test_successful_payment_closes_ticket_and_frees_slot(client, db_path):
         assert receipt[field]
 
     assert query(db_path, "SELECT status FROM tickets") == [("CLOSED",)]
-    assert query(db_path, "SELECT status FROM slots WHERE slot_id = 'S04'") == [("VACANT",)]
+    assert query(db_path, "SELECT status FROM slots WHERE slot_id = 'S01'") == [("VACANT",)]
     assert query(db_path, "SELECT amount, status FROM payments") == [(120, "SUCCESS")]
     assert query(db_path, "SELECT COUNT(*) FROM dwell_history") == [(1,)]
 
@@ -72,7 +72,7 @@ def test_forced_failure_keeps_ticket_open(client, db_path):
     assert response.status_code == 402
     assert response.get_json()["error"] == "PAYMENT_FAILED"
     assert query(db_path, "SELECT status FROM tickets") == [("ACTIVE",)]
-    assert query(db_path, "SELECT status FROM slots WHERE slot_id = 'S04'") == [("OCCUPIED",)]
+    assert query(db_path, "SELECT status FROM slots WHERE slot_id = 'S01'") == [("OCCUPIED",)]
     assert query(db_path, "SELECT status FROM payments") == [("FAILED",)]
 
     client.post("/api/admin/payment-mode", json={"force_failure": False})
@@ -105,7 +105,7 @@ def test_receipt_page(client, db_path):
     response = client.post("/pay", data={"ticket_id": ticket_id})
     assert response.status_code == 200
     page = response.get_data(as_text=True)
-    for text in ["PAY-000001", ticket_id, "KA01AB1234", "S04", "2 h 10 min", "Rs. 120", "OPEN"]:
+    for text in ["PAY-000001", ticket_id, "KA01AB1234", "S01", "2 h 10 min", "Rs. 120", "OPEN"]:
         assert text in page
 
 
@@ -120,12 +120,12 @@ def test_failed_payment_page_shows_error_and_keeps_quote(client, db_path):
 
 def test_only_admin_can_force_failure_and_change_is_audited(db_path):
     client = create_app({"TESTING": True, "DATABASE": db_path}).test_client()
-    client.post("/login", data={"username": "attendant", "password": "attend123"})
+    client.post("/login", data={"username": "attendant", "password": "Attend@123"})
     assert client.post("/api/admin/payment-mode", json={"force_failure": True}
                        ).status_code == 403
     client.post("/logout")
 
-    client.post("/login", data={"username": "admin", "password": "admin123"})
+    client.post("/login", data={"username": "admin", "password": "Admin@123"})
     assert client.post("/admin/payment-mode", data={"force_failure": "1"}).status_code == 302
     assert "Forced failure" in client.get("/").get_data(as_text=True)
     assert query(db_path, "SELECT action, old_value, new_value FROM audit_log"
