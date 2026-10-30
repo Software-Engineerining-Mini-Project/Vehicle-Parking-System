@@ -35,7 +35,7 @@ def test_grid_matches_the_layout(client):
     grid = slots(client)["grid"]
     assert len(grid) == 6 and all(len(row) == 8 for row in grid)
     assert grid[1][0]["type"] == "ENTRANCE"
-    assert grid[0][1] == {"type": "SLOT", "slot_id": "S01", "category": "ACCESSIBLE",
+    assert grid[0][1] == {"type": "SLOT", "slot_id": "S01", "category": "CAR",
                           "status": "VACANT"}
 
 
@@ -63,10 +63,10 @@ def test_reserve_and_release_a_slot(client):
 
 
 def test_reserved_slot_is_not_assigned(client):
-    client.post("/api/slots/S04/reserve", json={"reserved": True})
+    client.post("/api/slots/S01/reserve", json={"reserved": True})
     ticket = client.post("/api/parking/entry",
                          json={"plate": "KA01AB1234", "vehicle_type": "CAR"}).get_json()
-    assert ticket["slot_id"] != "S04"
+    assert ticket["slot_id"] != "S01"
 
 
 def test_occupied_or_unknown_slot_cannot_be_reserved(client):
@@ -86,4 +86,4 @@ def test_pages_include_the_live_grid(client, path):
 def test_entry_page_highlights_assigned_slot(client):
     page = client.post("/entry", data={"plate": "KA01AB1234", "vehicle_type": "CAR"}
                        ).get_data(as_text=True)
-    assert 'data-highlight="S04"' in page
+    assert 'data-highlight="S01"' in page

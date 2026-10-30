@@ -90,7 +90,7 @@ def test_exit_does_not_release_slot_before_payment(client, db_path):
     client.post("/api/parking/exit", json={"ticket_id": ticket_id})
     con = sqlite3.connect(db_path)
     assert con.execute("SELECT status FROM tickets").fetchone() == ("ACTIVE",)
-    assert con.execute("SELECT status FROM slots WHERE slot_id = 'S04'").fetchone() == ("OCCUPIED",)
+    assert con.execute("SELECT status FROM slots WHERE slot_id = 'S01'").fetchone() == ("OCCUPIED",)
     con.close()
 
 
@@ -112,7 +112,7 @@ def test_close_ticket_frees_slot_and_blocks_second_exit(client, db_path):
     con.row_factory = sqlite3.Row
     closed = close_ticket(con, ticket_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     assert closed["status"] == "CLOSED"
-    assert con.execute("SELECT status FROM slots WHERE slot_id = 'S04'").fetchone()[0] == "VACANT"
+    assert con.execute("SELECT status FROM slots WHERE slot_id = 'S01'").fetchone()[0] == "VACANT"
     assert con.execute("SELECT duration_min FROM dwell_history").fetchone()[0] == 45
     con.close()
 

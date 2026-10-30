@@ -46,7 +46,7 @@ def test_admin_and_attendant_accounts_exist(app, db_path):
     users = dict(query(db_path, "SELECT username, role FROM users"))
     assert users == {"admin": "ADMIN", "attendant": "ATTENDANT"}
     for (password_hash,) in query(db_path, "SELECT password_hash FROM users"):
-        assert "admin123" not in password_hash and "attend123" not in password_hash
+        assert "Admin@123" not in password_hash and "Attend@123" not in password_hash
 
 
 def test_data_survives_restart(app, db_path):
