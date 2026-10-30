@@ -55,6 +55,15 @@
 </section>
 {% endif %}
 
+<section class="card">
+    <h2>Predicted availability</h2>
+    <table>
+        {% for item in predictions() %}
+        <tr><th>{{ item.label }}</th><td>{{ item.message }}</td></tr>
+        {% endfor %}
+    </table>
+</section>
+
 {% set shown = ticket or preview %}
 {% with highlight = shown.slot_id if shown else None, path = shown.path if shown else None %}{% include "_slot_panel.html" %}{% endwith %}
 {% endblock %}
