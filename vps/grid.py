@@ -7,6 +7,7 @@ MOVES = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
 
 class GridError(ValueError):
+    """The facility layout is not valid."""
     pass
 
 
@@ -27,6 +28,7 @@ def load_grid(db):
 
 
 def validate_grid(grid):
+    """Check the grid size and that it has one entrance."""
     if not grid or len(grid) > MAX_SIZE or any(len(row) > MAX_SIZE for row in grid):
         raise GridError(f"The grid must be between 1 x 1 and {MAX_SIZE} x {MAX_SIZE}")
     kinds = [cell[0] for row in grid for cell in row]
@@ -35,6 +37,7 @@ def validate_grid(grid):
 
 
 def find_cell(grid, cell_type):
+    """Return the position of the first cell of a type."""
     for r, row in enumerate(grid):
         for c, (kind, _) in enumerate(row):
             if kind == cell_type:
@@ -79,6 +82,7 @@ def build_path(parent, goal):
 
 
 def slot_number(slot_id):
+    """Return the number in a slot ID, used to break ties."""
     return int(slot_id.lstrip("S"))
 
 

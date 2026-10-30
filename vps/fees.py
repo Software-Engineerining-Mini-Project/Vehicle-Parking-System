@@ -15,6 +15,7 @@ def billable_hours(duration_seconds, grace_minutes):
 
 
 def calculate_fee(duration_seconds, hourly_rate, grace_minutes=5):
+    """Return the fee in rupees for a stay."""
     return billable_hours(duration_seconds, grace_minutes) * hourly_rate
 
 
@@ -25,6 +26,7 @@ def load_tariff(db, vehicle_type):
 
 
 def format_duration(duration_seconds):
+    """Write a duration in words, such as 2 h 10 min."""
     hours, rest = divmod(int(duration_seconds), 3600)
     minutes, seconds = divmod(rest, 60)
     if hours:

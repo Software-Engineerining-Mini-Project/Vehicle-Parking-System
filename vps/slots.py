@@ -66,6 +66,7 @@ def set_reserved(db, slot_id, reserved):
 @bp.get("/api/slots")
 @login_required
 def api_slots():
+    """Return the slots, counts and grid for the live view."""
     return jsonify(slot_summary(get_db(), request.args.get("category"),
                                 request.args.get("status")))
 
@@ -73,6 +74,7 @@ def api_slots():
 @bp.post("/api/slots/<slot_id>/reserve")
 @role_required("ADMIN")
 def api_reserve(slot_id):
+    """Reserve or release a slot through the API."""
     data = request.get_json(silent=True) or {}
     body, status = set_reserved(get_db(), slot_id.upper(), bool(data.get("reserved", True)))
     return jsonify(body), status
@@ -81,4 +83,5 @@ def api_reserve(slot_id):
 @bp.get("/slots")
 @login_required
 def slots_page():
+    """Show the slot grid page."""
     return render_template("slots.html")
