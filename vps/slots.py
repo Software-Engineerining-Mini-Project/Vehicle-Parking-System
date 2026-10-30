@@ -1,6 +1,7 @@
 """Slot categories, live slot grid and vacant counts (REQ-SLOT-01 to 03)."""
 from flask import Blueprint, jsonify, render_template, request
 
+from .audit import record_action
 from .auth import login_required, role_required
 from .db import get_db
 from .grid import load_grid
@@ -54,10 +55,11 @@ def set_reserved(db, slot_id, reserved):
     changed = db.execute(
         "UPDATE slots SET status = ? WHERE slot_id = ? AND status = ?", (new, slot_id, old)
     ).rowcount
-    db.commit()
     if not changed:
         return {"error": "SLOT_NOT_" + old,
                 "message": f"{slot_id} is {slot['status'].lower()}, not {old.lower()}."}, 409
+    record_action(db, f"RESERVE_SLOT {slot_id}", old, new)
+    db.commit()
     return {"slot_id": slot_id, "status": new}, 200
 
 

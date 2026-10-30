@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Audit Log - Vehicle Parking System{% endblock %}
+{% block content %}
+<h1>Audit Log</h1>
+<p>Newest first. Entries are append-only and cannot be edited or deleted.</p>
+<section class="card table-scroll">
+    <table>
+        <tr><th>Time</th><th>User</th><th>Action</th><th>Old value</th><th>New value</th></tr>
+        {% for row in rows %}
+        <tr><td>{{ row.logged_at }}</td><td>{{ row.username or '-' }}</td><td>{{ row.action }}</td><td>{{ row.old_value or '' }}</td><td>{{ row.new_value or '' }}</td></tr>
+        {% else %}
+        <tr><td colspan="5">No entries yet.</td></tr>
+        {% endfor %}
+    </table>
+</section>
+{% endblock %}

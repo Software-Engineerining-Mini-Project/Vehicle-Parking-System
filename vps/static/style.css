@@ -131,3 +131,9 @@ a.button {
     padding: 8px 12px;
     text-decoration: none;
 }
+
+/* ---------- admin ---------- */
+form.layout-form { max-width: 640px; }
+form.card h2 { margin: 0 0 4px; }
+textarea { font: 0.95rem/1.5 Consolas, Menlo, monospace; padding: 8px; border: 1px solid #b8bec7; border-radius: 6px; }
+.table-scroll { overflow-x: auto; }
