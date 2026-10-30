@@ -11,6 +11,36 @@
         <button type="submit">{{ 'Back to normal' if failing else 'Force failure' }}</button>
     </form>
 </section>
+<section class="card admin-panel">
+    <h2>Demo controls</h2>
+    <p>Application time: <strong>{{ app_time() }}</strong></p>
+    <form method="post" action="{{ url_for('demo.clock_page') }}" class="button-row">
+        <button type="submit" name="step" value="5min">+5 min</button>
+        <button type="submit" name="step" value="1h">+1 hour</button>
+        <button type="submit" name="step" value="1day">+1 day</button>
+    </form>
+    {% if history_seeded() %}
+    <p>Demo data: 200 synthetic records loaded.</p>
+    {% else %}
+    <form method="post" action="{{ url_for('demo.seed_page') }}">
+        <button type="submit">Seed Demo Data (200 records, 14 days)</button>
+    </form>
+    {% endif %}
+</section>
+<section class="card admin-panel">
+    <h2>Overstay alerts</h2>
+    {% set flagged = overstays() %}
+    {% if flagged %}
+    <table>
+        <tr><th>Ticket</th><th>Plate</th><th>Slot</th><th>Parked</th><th>Flag</th></tr>
+        {% for t in flagged %}
+        <tr><td>{{ t.ticket_id }}</td><td>{{ t.plate_number }}</td><td>{{ t.slot_id }}</td><td>{{ t.parked }}</td><td class="error">Overstay</td></tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No vehicle has been parked for over 24 hours.</p>
+    {% endif %}
+</section>
 {% endif %}
 {% include "_slot_panel.html" %}
 {% endblock %}

@@ -3,7 +3,7 @@ import os
 
 from flask import Flask, render_template
 
-from . import auth, db, parking, payment, slots
+from . import auth, db, demo, parking, payment, slots
 
 
 def create_app(test_config=None):
@@ -21,6 +21,7 @@ def create_app(test_config=None):
     app.register_blueprint(parking.bp)
     app.register_blueprint(slots.bp)
     app.register_blueprint(payment.bp)
+    app.register_blueprint(demo.bp)
 
     @app.route("/")
     @auth.login_required

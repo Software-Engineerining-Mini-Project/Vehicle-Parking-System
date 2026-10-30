@@ -110,3 +110,6 @@ header nav a, header .user { white-space: nowrap; }
     header, button, main > p { display: none; }
     .card { border: 0; }
 }
+
+/* ---------- demo controls ---------- */
+.button-row { display: flex; gap: 8px; flex-wrap: wrap; }
