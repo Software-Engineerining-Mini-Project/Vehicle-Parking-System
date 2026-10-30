@@ -28,6 +28,11 @@ GitHub Actions runs the same tests on every pull request on Ubuntu, Windows and 
 | TC-16 | SEC-04, 05 | SQL injection strings in plate, ticket, login; script tag | No bypass or database change; script shown as escaped text | Pass |
 | TC-17 | SEC-06, 07 | Cookie flags; idle 16 min; replay after logout; bad CSRF tokens | HttpOnly and SameSite=Lax; redirected to login; old cookie refused; HTTP 400 | Pass |
 
+**Timing checks:** the figures above come from `scripts/perf_check.py` on a developer laptop, as
+the Test Plan measures timing on a reference machine. Automated timing checks are switched off on
+GitHub Actions, because shared runners vary too much: one Windows run measured a P95 of 2.5 s for
+entry plus paid exit while the other five jobs passed. No target is checked on those machines.
+
 **Summary:** 16 of 17 run and passing, TC-13 not yet run. Timings were measured on one developer
 laptop with Python 3.14. Defect found while testing: a second login ended the first session
 (fixed in #26), and the layout and passwords differed from the Test Plan (fixed in #37).
