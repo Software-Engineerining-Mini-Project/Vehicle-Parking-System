@@ -85,8 +85,7 @@ def test_grid_needs_one_entrance():
         validate_grid(make_grid(["..1"]))
 
 
-@pytest.mark.skipif("CI" in os.environ, reason="timing is measured on the reference "
-                                              "machine; shared CI runners are too variable")
+@pytest.mark.skipif("CI" in os.environ, reason="timing is checked on the reference machine")
 def test_bfs_is_fast_on_largest_grid():
     # NFR-PERF-04: within 500 ms for 50+ nodes; a full 10 x 10 grid has 100
     lines = ["N" + "." * 9] + ["." * 10 for _ in range(8)] + ["." * 9 + "9"]

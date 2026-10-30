@@ -177,8 +177,7 @@ def test_tc09_demo_data_clock_and_overstay(app, db_path):
     assert "Overstay</td>" in admin.get("/").get_data(as_text=True)
 
 
-@pytest.mark.skipif("CI" in os.environ, reason="timing is measured on the reference "
-                                              "machine; shared CI runners are too variable")
+@pytest.mark.skipif("CI" in os.environ, reason="timing is checked on the reference machine")
 def test_tc10_timing(app):
     client = logged_in(app)
     timings = []
