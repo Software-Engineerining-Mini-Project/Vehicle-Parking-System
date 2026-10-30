@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Reports - Vehicle Parking System{% endblock %}
+{% block content %}
+<h1>Reports</h1>
+
+<form method="get" class="card" novalidate>
+    <label for="start">From</label>
+    <input id="start" name="start" type="date" value="{{ report.start if report else args.get('start', '') }}">
+    <label for="end">To</label>
+    <input id="end" name="end" type="date" value="{{ report.end if report else args.get('end', '') }}">
+    <label for="period">Group by</label>
+    <select id="period" name="period">
+        {% for value, label in periods.items() %}
+        <option value="{{ value }}" {% if (report.period if report else args.get('period')) == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <button type="submit">Generate Report</button>
+</form>
+
+{% if report %}
+{% set query = {'start': report.start, 'end': report.end, 'period': report.period} %}
+<section class="card">
+    <h2>{{ report.start }} to {{ report.end }}</h2>
+    <p class="button-row">
+        <a class="button" href="{{ url_for('reports.export_csv', **query) }}">Export CSV</a>
+        <a class="button" href="{{ url_for('reports.export_pdf', **query) }}">Export PDF</a>
+    </p>
+    <p>Total revenue: <strong>Rs. {{ report.total_revenue }}</strong><br>
+       Peak hour: <strong>{{ report.peak_hour }}</strong></p>
+    <table>
+        <tr><th>Category</th><th>Average utilisation (%)</th></tr>
+        {% for row in report.utilisation %}
+        <tr><td>{{ row.category }}</td><td>{{ row.utilisation_percent }}</td></tr>
+        {% endfor %}
+    </table>
+    <h3>By period</h3>
+    <table>
+        <tr><th>Period</th><th>Occupancy (%)</th><th>Revenue (Rs.)</th></tr>
+        {% for row in report.rows %}
+        <tr><td>{{ row.period }}</td><td>{{ row.occupancy_percent }}</td><td>{{ row.revenue }}</td></tr>
+        {% endfor %}
+    </table>
+</section>
+{% endif %}
+{% endblock %}

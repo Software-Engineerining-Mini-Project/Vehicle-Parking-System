@@ -122,3 +122,12 @@ button.secondary { background: #fff; color: #1f2a37; border: 1px solid #1f2a37; 
 button.secondary:hover { background: #eceef1; }
 .notice { font-weight: 600; border-left: 4px solid #fdb022; }
 .preview { margin: 4px 0; }
+
+/* ---------- reports ---------- */
+a.button {
+    background: #1f2a37;
+    color: #fff;
+    border-radius: 6px;
+    padding: 8px 12px;
+    text-decoration: none;
+}
