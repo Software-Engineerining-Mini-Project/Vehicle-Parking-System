@@ -104,8 +104,12 @@ def nearest_slot(grid, vacant_slot_ids, start_from="ENTRANCE"):
 CATEGORY_FOR = {"TWO_WHEELER": "TWO_WHEELER", "CAR": "CAR", "EV": "EV"}
 
 
-def assign_slot(db, vehicle_type, accessible=False, start_from="ENTRANCE"):
-    """Choose a slot for a new vehicle. Returns (slot_id, path) or None if none is free."""
+def assign_slot(db, vehicle_type, accessible=False, start_from="ENTRANCE", preferred=None):
+    """Choose a slot for a new vehicle. Returns (slot_id, path) or None if none is free.
+
+    A preferred slot (the one shown in the route preview) is kept while it is still
+    vacant and reachable; otherwise the next best slot is chosen (REQ-NAV-04).
+    """
     category = "ACCESSIBLE" if accessible else CATEGORY_FOR[vehicle_type]
     vacant = {
         r["slot_id"]
@@ -115,4 +119,9 @@ def assign_slot(db, vehicle_type, accessible=False, start_from="ENTRANCE"):
     }
     if not vacant:
         return None
-    return nearest_slot(load_grid(db), vacant, start_from)
+    grid = load_grid(db)
+    if preferred in vacant:
+        choice = nearest_slot(grid, {preferred}, start_from)
+        if choice:
+            return choice
+    return nearest_slot(grid, vacant, start_from)

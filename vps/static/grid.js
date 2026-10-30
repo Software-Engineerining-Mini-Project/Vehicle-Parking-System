@@ -34,11 +34,19 @@
         box.replaceChildren(table);
     }
 
-    function renderGrid(box, grid, highlight) {
+    function pathCells(panel) {
+        var cells = {};
+        JSON.parse(panel.dataset.path || "[]").forEach(function (cell) {
+            cells[cell[0] + "," + cell[1]] = true;
+        });
+        return cells;
+    }
+
+    function renderGrid(box, grid, highlight, route) {
         box.style.gridTemplateColumns = "repeat(" + grid[0].length + ", 1fr)";
         var cells = [];
-        grid.forEach(function (row) {
-            row.forEach(function (cell) {
+        grid.forEach(function (row, r) {
+            row.forEach(function (cell, c) {
                 var node;
                 if (cell.type === "SLOT") {
                     node = el("div", "cell slot " + cell.status);
@@ -51,6 +59,9 @@
                 } else {
                     node = el("div", "cell " + cell.type,
                               cell.type === "ENTRANCE" ? "IN" : cell.type === "EXIT" ? "OUT" : "");
+                }
+                if (route[r + "," + c]) {
+                    node.className += " on-path";
                 }
                 cells.push(node);
             });
@@ -66,7 +77,8 @@
                     return;
                 }
                 renderCounts(panel.querySelector("[data-counts]"), data.counts);
-                renderGrid(panel.querySelector("[data-grid]"), data.grid, panel.dataset.highlight);
+                renderGrid(panel.querySelector("[data-grid]"), data.grid, panel.dataset.highlight,
+                           pathCells(panel));
             })
             .catch(function () { /* keep the last good view if a request fails */ });
     }

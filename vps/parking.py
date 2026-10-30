@@ -15,6 +15,7 @@ bp = Blueprint("parking", __name__)
 
 PLATE_PATTERN = re.compile(r"^[A-Z0-9]{4,10}$")
 VEHICLE_TYPES = {"TWO_WHEELER": "Two-Wheeler", "CAR": "Car", "EV": "EV"}
+START_POINTS = {"ENTRANCE": "entrance", "EXIT": "exit"}
 
 
 class ParkingError(Exception):
@@ -40,12 +41,41 @@ def is_checked(value):
     return str(value).lower() in {"1", "true", "on", "yes"}
 
 
-def register_entry(db, raw_plate, vehicle_type, accessible=False):
-    """Validate the vehicle, assign the nearest suitable slot and open a ticket."""
+def validate_vehicle(raw_plate, vehicle_type, start_from):
+    """Check the entry fields and return the normalised plate."""
     plate = normalise_plate(raw_plate)
     if vehicle_type not in VEHICLE_TYPES:
         raise ParkingError(400, "INVALID_VEHICLE_TYPE",
                            "Vehicle type must be Two-Wheeler, Car or EV.")
+    if start_from not in START_POINTS:
+        raise ParkingError(400, "INVALID_START_POINT", "Start point must be Entrance or Exit.")
+    return plate
+
+
+def no_slot_error(vehicle_type, accessible):
+    """Build the refusal for a full category."""
+    wanted = "accessible" if accessible else VEHICLE_TYPES[vehicle_type]
+    return ParkingError(409, "NO_SLOT_AVAILABLE", f"No {wanted} slot is free right now.")
+
+
+def preview_route(db, raw_plate, vehicle_type, accessible=False, start_from="ENTRANCE"):
+    """Show which slot and route would be given, without changing anything (REQ-NAV-03)."""
+    validate_vehicle(raw_plate, vehicle_type, start_from)
+    assignment = assign_slot(db, vehicle_type, accessible, start_from)
+    if assignment is None:
+        raise no_slot_error(vehicle_type, accessible)
+    slot_id, path = assignment
+    return {"slot_id": slot_id, "path": [list(cell) for cell in path], "start_from": start_from}
+
+
+def register_entry(db, raw_plate, vehicle_type, accessible=False, start_from="ENTRANCE",
+                   target_slot=None):
+    """Validate the vehicle, assign the nearest suitable slot and open a ticket.
+
+    target_slot is the slot from the route preview. If it was taken or its path was
+    blocked in the meantime, the next best slot is given and reported (REQ-NAV-04).
+    """
+    plate = validate_vehicle(raw_plate, vehicle_type, start_from)
 
     # Lock the database for writing so two entries cannot take the same slot
     db.execute("BEGIN IMMEDIATE")
@@ -58,11 +88,9 @@ def register_entry(db, raw_plate, vehicle_type, accessible=False):
             raise ParkingError(409, "DUPLICATE_ACTIVE_TICKET",
                                f"{plate} is already parked on ticket {active['ticket_id']}.")
 
-        assignment = assign_slot(db, vehicle_type, accessible)
+        assignment = assign_slot(db, vehicle_type, accessible, start_from, target_slot)
         if assignment is None:
-            wanted = "accessible" if accessible else VEHICLE_TYPES[vehicle_type]
-            raise ParkingError(409, "NO_SLOT_AVAILABLE",
-                               f"No {wanted} slot is free right now.")
+            raise no_slot_error(vehicle_type, accessible)
         slot_id, path = assignment
 
         entered = clock.now(db)
@@ -97,6 +125,8 @@ def register_entry(db, raw_plate, vehicle_type, accessible=False):
 
     ticket = get_ticket(db, ticket_id)
     ticket["path"] = [list(cell) for cell in path]
+    ticket["start_from"] = start_from
+    ticket["reassigned_from"] = target_slot if target_slot not in (None, slot_id) else None
     return ticket
 
 
@@ -180,10 +210,24 @@ def api_entry():
     data = request.get_json(silent=True) or request.form
     try:
         ticket = register_entry(get_db(), data.get("plate"), data.get("vehicle_type"),
-                                is_checked(data.get("accessible", False)))
+                                is_checked(data.get("accessible", False)),
+                                data.get("start_from", "ENTRANCE"), data.get("target_slot"))
     except ParkingError as err:
         return error_response(err)
     return jsonify(ticket), 201
+
+
+@bp.post("/api/parking/preview")
+@login_required
+def api_preview():
+    """Return the slot and route an entry would get, without creating a ticket."""
+    data = request.get_json(silent=True) or request.form
+    try:
+        return jsonify(preview_route(get_db(), data.get("plate"), data.get("vehicle_type"),
+                                     is_checked(data.get("accessible", False)),
+                                     data.get("start_from", "ENTRANCE")))
+    except ParkingError as err:
+        return error_response(err)
 
 
 @bp.post("/api/parking/exit")
@@ -220,19 +264,23 @@ def ticket_qr(ticket_id):
 @bp.route("/entry", methods=["GET", "POST"])
 @login_required
 def entry_page():
-    ticket = error = None
+    ticket = preview = error = None
     status = 200
     form = request.form
     if request.method == "POST":
+        fields = (form.get("plate"), form.get("vehicle_type"),
+                  is_checked(form.get("accessible")), form.get("start_from", "ENTRANCE"))
         try:
-            ticket = register_entry(get_db(), form.get("plate"), form.get("vehicle_type"),
-                                    is_checked(form.get("accessible")))
-            status = 201
-            form = {}  # clear the form so the same vehicle is not submitted twice
+            if form.get("action") == "preview":
+                preview = preview_route(get_db(), *fields)
+            else:
+                ticket = register_entry(get_db(), *fields, form.get("target_slot") or None)
+                status = 201
+                form = {}  # clear the form so the same vehicle is not submitted twice
         except ParkingError as err:
             error, status = err.message, err.status
-    return render_template("entry.html", ticket=ticket, error=error, form=form,
-                           vehicle_types=VEHICLE_TYPES), status
+    return render_template("entry.html", ticket=ticket, preview=preview, error=error, form=form,
+                           vehicle_types=VEHICLE_TYPES, start_points=START_POINTS), status
 
 
 @bp.route("/exit", methods=["GET", "POST"])

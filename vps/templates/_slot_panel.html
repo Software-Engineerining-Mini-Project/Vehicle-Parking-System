@@ -1,6 +1,7 @@
 {# Live vacant counts and slot grid. Filled in and refreshed every 500 ms by grid.js. #}
 <section class="card slot-panel" data-slot-panel data-url="{{ url_for('slots.api_slots') }}"
-         {% if highlight %}data-highlight="{{ highlight }}"{% endif %}>
+         {% if highlight %}data-highlight="{{ highlight }}"{% endif %}
+         {% if path %}data-path="{{ path | tojson | forceescape }}"{% endif %}>
     <h2>Live slot availability</h2>
     <div class="slot-counts" data-counts><p>Loading...</p></div>
     <div class="slot-grid" data-grid aria-label="Facility slot grid"></div>
@@ -11,6 +12,7 @@
         <li><span class="cell ROAD"></span> Road</li>
         <li><span class="cell WALL"></span> Wall</li>
         <li><span class="cell ENTRANCE"></span> Entrance / Exit</li>
+        <li><span class="cell ROAD on-path"></span> Route</li>
     </ul>
 </section>
 <script src="{{ url_for('static', filename='grid.js') }}"></script>

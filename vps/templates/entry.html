@@ -17,11 +17,28 @@
 
     <label class="inline"><input type="checkbox" name="accessible" {% if form.get('accessible') %}checked{% endif %}> Needs an accessible slot</label>
 
+    <label for="start_from">Assign the slot nearest to</label>
+    <select id="start_from" name="start_from">
+        {% for value, label in start_points.items() %}
+        <option value="{{ value }}" {% if form.get('start_from', 'ENTRANCE') == value %}selected{% endif %}>{{ label.title() }}</option>
+        {% endfor %}
+    </select>
+
     {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
-    <button type="submit">Simulate Entry</button>
+    {% if preview %}
+    <p class="preview">Proposed slot: <strong>{{ preview.slot_id }}</strong>, {{ preview.path | length - 1 }} steps from the {{ start_points[preview.start_from] }}. The route is drawn on the map below.</p>
+    <input type="hidden" name="target_slot" value="{{ preview.slot_id }}">
+    {% endif %}
+    <div class="button-row">
+        <button type="submit" name="action" value="preview" class="secondary">Preview Route</button>
+        <button type="submit" name="action" value="confirm">{{ 'Confirm Entry' if preview else 'Simulate Entry' }}</button>
+    </div>
 </form>
 
 {% if ticket %}
+{% if ticket.reassigned_from %}
+<p class="card notice" role="status">Slot {{ ticket.reassigned_from }} is no longer available, so the next best slot {{ ticket.slot_id }} was assigned.</p>
+{% endif %}
 <section class="card ticket">
     <div>
         <h2>Ticket {{ ticket.ticket_id }}</h2>
@@ -30,7 +47,7 @@
             <tr><th>Vehicle type</th><td>{{ vehicle_types[ticket.vehicle_type] }}</td></tr>
             <tr><th>Assigned slot</th><td><strong>{{ ticket.slot_id }}</strong> ({{ ticket.category.replace('_', '-').title() }})</td></tr>
             <tr><th>Entry time</th><td>{{ ticket.entry_time }}</td></tr>
-            <tr><th>Route</th><td>{{ ticket.path | length - 1 }} steps from the entrance</td></tr>
+            <tr><th>Route</th><td>{{ ticket.path | length - 1 }} steps from the {{ start_points[ticket.start_from] }}</td></tr>
             <tr><th>Gate</th><td class="gate">OPEN</td></tr>
         </table>
     </div>
@@ -38,5 +55,6 @@
 </section>
 {% endif %}
 
-{% with highlight = ticket.slot_id if ticket else None %}{% include "_slot_panel.html" %}{% endwith %}
+{% set shown = ticket or preview %}
+{% with highlight = shown.slot_id if shown else None, path = shown.path if shown else None %}{% include "_slot_panel.html" %}{% endwith %}
 {% endblock %}
