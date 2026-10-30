@@ -43,9 +43,10 @@ def process_payment(db, ticket_id):
     On success the ticket is closed and the slot freed; on failure nothing changes
     except that the failed attempt is recorded.
     """
-    quote = quote_exit(db, ticket_id)
-    failed = force_failure_on(db)
+    db.execute("BEGIN IMMEDIATE")
     try:
+        quote = quote_exit(db, ticket_id)
+        failed = force_failure_on(db)
         cursor = db.execute(
             "INSERT INTO payments (ticket_id, amount, status, paid_at) VALUES (?, ?, ?, ?)",
             (quote["ticket_id"], quote["fee"], "FAILED" if failed else "SUCCESS",

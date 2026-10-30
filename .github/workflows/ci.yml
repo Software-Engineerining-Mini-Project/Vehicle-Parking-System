@@ -12,8 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # QA-POR-01: the app must run unchanged on Windows and Linux with Python 3.10+
-        os: [ubuntu-latest, windows-latest]
+        # QA-POR-01: the app must run unchanged on Windows, macOS and Linux with Python 3.10+
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.10", "3.12"]
 
     steps:
