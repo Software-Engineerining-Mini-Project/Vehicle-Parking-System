@@ -10,6 +10,8 @@ from . import clock, fees
 from .auth import login_required
 from .db import get_db
 from .grid import assign_slot
+from .prediction import next_vacancy_message
+from .slots import CATEGORY_LABELS
 
 bp = Blueprint("parking", __name__)
 
@@ -52,10 +54,12 @@ def validate_vehicle(raw_plate, vehicle_type, start_from):
     return plate
 
 
-def no_slot_error(vehicle_type, accessible):
-    """Build the refusal for a full category."""
-    wanted = "accessible" if accessible else VEHICLE_TYPES[vehicle_type]
-    return ParkingError(409, "NO_SLOT_AVAILABLE", f"No {wanted} slot is free right now.")
+def no_slot_error(db, vehicle_type, accessible):
+    """Build the refusal for a full category, with the predicted wait (REQ-SLOT-04)."""
+    category = "ACCESSIBLE" if accessible else vehicle_type
+    return ParkingError(409, "NO_SLOT_AVAILABLE",
+                        f"No {CATEGORY_LABELS[category]} slot available. "
+                        f"{next_vacancy_message(db, category)}")
 
 
 def preview_route(db, raw_plate, vehicle_type, accessible=False, start_from="ENTRANCE"):
@@ -63,7 +67,7 @@ def preview_route(db, raw_plate, vehicle_type, accessible=False, start_from="ENT
     validate_vehicle(raw_plate, vehicle_type, start_from)
     assignment = assign_slot(db, vehicle_type, accessible, start_from)
     if assignment is None:
-        raise no_slot_error(vehicle_type, accessible)
+        raise no_slot_error(db, vehicle_type, accessible)
     slot_id, path = assignment
     return {"slot_id": slot_id, "path": [list(cell) for cell in path], "start_from": start_from}
 
@@ -90,7 +94,7 @@ def register_entry(db, raw_plate, vehicle_type, accessible=False, start_from="EN
 
         assignment = assign_slot(db, vehicle_type, accessible, start_from, target_slot)
         if assignment is None:
-            raise no_slot_error(vehicle_type, accessible)
+            raise no_slot_error(db, vehicle_type, accessible)
         slot_id, path = assignment
 
         entered = clock.now(db)
