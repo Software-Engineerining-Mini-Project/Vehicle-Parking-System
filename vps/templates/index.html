@@ -7,6 +7,7 @@
     {% set failing = payment_force_failure() %}
     <p>Status: <strong>{{ 'Forced failure (every payment fails)' if failing else 'Normal (payments succeed)' }}</strong></p>
     <form method="post" action="{{ url_for('payment.payment_mode_page') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="force_failure" value="{{ '0' if failing else '1' }}">
         <button type="submit">{{ 'Back to normal' if failing else 'Force failure' }}</button>
     </form>
@@ -15,6 +16,7 @@
     <h2>Demo controls</h2>
     <p>Application time: <strong>{{ app_time() }}</strong></p>
     <form method="post" action="{{ url_for('demo.clock_page') }}" class="button-row">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" name="step" value="5min">+5 min</button>
         <button type="submit" name="step" value="1h">+1 hour</button>
         <button type="submit" name="step" value="1day">+1 day</button>
@@ -23,6 +25,7 @@
     <p>Demo data: 200 synthetic records loaded.</p>
     {% else %}
     <form method="post" action="{{ url_for('demo.seed_page') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit">Seed Demo Data (200 records, 14 days)</button>
     </form>
     {% endif %}

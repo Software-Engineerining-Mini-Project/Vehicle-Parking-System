@@ -22,6 +22,7 @@
             {% endif %}
             <span class="user">{{ current_user.username }} ({{ role_labels[current_user.role] }})</span>
             <form method="post" action="{{ url_for('auth.logout') }}" class="logout">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit">Log out</button>
             </form>
             {% else %}
