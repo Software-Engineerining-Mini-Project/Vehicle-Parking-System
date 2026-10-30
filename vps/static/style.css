@@ -113,3 +113,12 @@ header nav a, header .user { white-space: nowrap; }
 
 /* ---------- demo controls ---------- */
 .button-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- route on the map ---------- */
+.cell.on-path { background: #93c5fd; }
+.cell.ENTRANCE.on-path, .cell.EXIT.on-path { background: #1d4ed8; }
+.cell.slot.on-path { background: #93c5fd; }
+button.secondary { background: #fff; color: #1f2a37; border: 1px solid #1f2a37; }
+button.secondary:hover { background: #eceef1; }
+.notice { font-weight: 600; border-left: 4px solid #fdb022; }
+.preview { margin: 4px 0; }
