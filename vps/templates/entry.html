@@ -4,6 +4,7 @@
 <h1>Vehicle Entry</h1>
 
 <form method="post" class="card" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label for="plate">Plate number</label>
     <input id="plate" name="plate" value="{{ form.get('plate', '') }}" placeholder="e.g. KA01AB1234"
            maxlength="20" autocomplete="off" autofocus>

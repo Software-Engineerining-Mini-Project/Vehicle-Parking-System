@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash   TEXT NOT NULL,
     role            TEXT NOT NULL CHECK (role IN ('ADMIN', 'ATTENDANT')),
     failed_attempts INTEGER NOT NULL DEFAULT 0,
-    locked_until    TEXT
+    locked_until    TEXT,
+    session_token   TEXT
 );
 
 CREATE TABLE IF NOT EXISTS vehicles (

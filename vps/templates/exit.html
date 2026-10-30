@@ -4,6 +4,7 @@
 <h1>Vehicle Exit</h1>
 
 <form method="post" class="card" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label for="ticket_id">Ticket ID</label>
     <input id="ticket_id" name="ticket_id" value="{{ form.get('ticket_id', '') }}"
            placeholder="e.g. VPS-20261023-0001" autocomplete="off" autofocus>
@@ -29,6 +30,7 @@
         <tr><th>Fee</th><td class="fee">Rs. {{ quote.fee }}</td></tr>
     </table>
     <form method="post" action="{{ url_for('payment.pay_page') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="ticket_id" value="{{ quote.ticket_id }}">
         <button type="submit">Pay (Mock) Rs. {{ quote.fee }}</button>
     </form>

@@ -16,6 +16,8 @@ from .slots import CATEGORY_LABELS
 bp = Blueprint("parking", __name__)
 
 PLATE_PATTERN = re.compile(r"^[A-Z0-9]{4,10}$")
+TICKET_PATTERN = re.compile(r"^VPS-\d{8}-\d{4}$")
+SLOT_PATTERN = re.compile(r"^S\d{2,3}$")
 VEHICLE_TYPES = {"TWO_WHEELER": "Two-Wheeler", "CAR": "Car", "EV": "EV"}
 START_POINTS = {"ENTRANCE": "entrance", "EXIT": "exit"}
 
@@ -80,6 +82,8 @@ def register_entry(db, raw_plate, vehicle_type, accessible=False, start_from="EN
     blocked in the meantime, the next best slot is given and reported (REQ-NAV-04).
     """
     plate = validate_vehicle(raw_plate, vehicle_type, start_from)
+    if not (isinstance(target_slot, str) and SLOT_PATTERN.match(target_slot)):
+        target_slot = None
 
     # Lock the database for writing so two entries cannot take the same slot
     db.execute("BEGIN IMMEDIATE")
@@ -135,16 +139,19 @@ def register_entry(db, raw_plate, vehicle_type, accessible=False, start_from="EN
 
 
 def get_ticket(db, ticket_id):
+    ticket_id = str(ticket_id).strip().upper()
+    if not TICKET_PATTERN.match(ticket_id):
+        raise ParkingError(404, "TICKET_NOT_FOUND", "No ticket found with that ID.")
     row = db.execute(
         "SELECT t.ticket_id, v.plate_number, v.vehicle_type, t.slot_id, s.category,"
         " t.entry_time, t.exit_time, t.status"
         " FROM tickets t"
         " JOIN vehicles v ON v.vehicle_id = t.vehicle_id"
         " JOIN slots s ON s.slot_id = t.slot_id"
-        " WHERE t.ticket_id = ?", (ticket_id.strip().upper(),)
+        " WHERE t.ticket_id = ?", (ticket_id,)
     ).fetchone()
     if row is None:
-        raise ParkingError(404, "TICKET_NOT_FOUND", f"No ticket found with ID {ticket_id}.")
+        raise ParkingError(404, "TICKET_NOT_FOUND", "No ticket found with that ID.")
     return dict(row)
 
 
@@ -154,7 +161,7 @@ def quote_exit(db, ticket_id):
     The ticket stays open: it is closed only after the mock payment succeeds
     (Design Spec 4.3, PAYMENT_FAILED rule), using close_ticket().
     """
-    if not ticket_id.strip():
+    if not str(ticket_id).strip():
         raise ParkingError(400, "MISSING_TICKET_ID", "Enter the ticket ID.")
     ticket = get_ticket(db, ticket_id)
     if ticket["status"] != "ACTIVE":
