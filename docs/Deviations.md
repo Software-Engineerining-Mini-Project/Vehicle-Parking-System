@@ -32,6 +32,7 @@ says, what was built and why.
 | D-16 | TC-13 usability | Run with 5 first-time users | Not run yet | Planned for the testing sprint |
 | D-17 | TC-12 install | Fresh install on Windows, Ubuntu, macOS | Windows by hand; Ubuntu and macOS through CI test runs | No team access confirmed to those machines |
 | D-18 | Test count | 48 automated tests | 211 automated tests | Wider coverage than planned |
+| D-19 | Timing checks | Test Plan measures timing on a reference machine | Wall-clock checks run on the developer laptop and are skipped on GitHub Actions | Shared runners vary too much (one Windows run measured 2.5 s) |
 
 ## 3. Process
 
