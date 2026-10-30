@@ -20,6 +20,7 @@ def get_db():
 
 
 def close_db(exc=None):
+    """Close the connection at the end of the request."""
     db = g.pop("db", None)
     if db is not None:
         db.close()
@@ -36,6 +37,7 @@ def init_db():
 
 
 def init_app(app):
+    """Register the database with the app and prepare it."""
     app.teardown_appcontext(close_db)
     with app.app_context():
         init_db()

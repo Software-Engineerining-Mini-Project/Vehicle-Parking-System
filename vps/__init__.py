@@ -23,6 +23,7 @@ def load_secret_key(instance_path):
 
 
 def create_app(test_config=None):
+    """Create and configure the Flask application."""
     app = Flask(__name__, instance_relative_config=True)
     os.makedirs(app.instance_path, exist_ok=True)
     test_config = test_config or {}
@@ -43,6 +44,7 @@ def create_app(test_config=None):
 
     @app.errorhandler(CSRFError)
     def csrf_failed(error):
+        """Answer a missing or invalid CSRF token with HTTP 400."""
         message = "Your session form has expired or is not valid. Please try again."
         if request.path.startswith("/api/"):
             return jsonify(error="CSRF_FAILED", message=message), 400
@@ -61,6 +63,7 @@ def create_app(test_config=None):
     @app.route("/")
     @auth.login_required
     def index():
+        """Show the dashboard."""
         return render_template("index.html")
 
     return app

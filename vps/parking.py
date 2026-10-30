@@ -26,6 +26,7 @@ class ParkingError(Exception):
     """A request that cannot be completed, with the HTTP status and error code to return."""
 
     def __init__(self, status, code, message):
+        """Store the HTTP status, error code and message."""
         super().__init__(message)
         self.status = status
         self.code = code
@@ -42,6 +43,7 @@ def normalise_plate(raw):
 
 
 def is_checked(value):
+    """Read a checkbox or boolean value."""
     return str(value).lower() in {"1", "true", "on", "yes"}
 
 
@@ -139,6 +141,7 @@ def register_entry(db, raw_plate, vehicle_type, accessible=False, start_from="EN
 
 
 def get_ticket(db, ticket_id):
+    """Return one ticket with its vehicle and slot details."""
     ticket_id = str(ticket_id).strip().upper()
     if not TICKET_PATTERN.match(ticket_id):
         raise ParkingError(404, "TICKET_NOT_FOUND", "No ticket found with that ID.")
@@ -205,11 +208,13 @@ def close_ticket(db, ticket_id, exit_time):
 
 
 def qr_svg(text):
+    """Return a QR code for the text as SVG."""
     image = qrcode.make(text, image_factory=qrcode.image.svg.SvgPathImage, box_size=10)
     return image.to_string(encoding="unicode")
 
 
 def error_response(err):
+    """Turn a ParkingError into a JSON response."""
     return jsonify(error=err.code, message=err.message), err.status
 
 
@@ -218,6 +223,7 @@ def error_response(err):
 @bp.post("/api/parking/entry")
 @login_required
 def api_entry():
+    """Create a ticket from a JSON or form request."""
     data = request.get_json(silent=True) or request.form
     try:
         ticket = register_entry(get_db(), data.get("plate"), data.get("vehicle_type"),
@@ -244,6 +250,7 @@ def api_preview():
 @bp.post("/api/parking/exit")
 @login_required
 def api_exit():
+    """Return the duration and fee for a ticket."""
     data = request.get_json(silent=True) or request.form
     try:
         return jsonify(quote_exit(get_db(), data.get("ticket_id") or ""))
@@ -254,6 +261,7 @@ def api_exit():
 @bp.get("/api/parking/<ticket_id>")
 @login_required
 def api_ticket(ticket_id):
+    """Return the details of a ticket."""
     try:
         return jsonify(get_ticket(get_db(), ticket_id))
     except ParkingError as err:
@@ -263,6 +271,7 @@ def api_ticket(ticket_id):
 @bp.get("/tickets/<ticket_id>/qr.svg")
 @login_required
 def ticket_qr(ticket_id):
+    """Return the QR code image of a ticket."""
     try:
         ticket = get_ticket(get_db(), ticket_id)
     except ParkingError:
@@ -275,6 +284,7 @@ def ticket_qr(ticket_id):
 @bp.route("/entry", methods=["GET", "POST"])
 @login_required
 def entry_page():
+    """Show the entry screen and handle preview and confirm."""
     ticket = preview = error = None
     status = 200
     form = request.form
@@ -297,6 +307,7 @@ def entry_page():
 @bp.route("/exit", methods=["GET", "POST"])
 @login_required
 def exit_page():
+    """Show the exit screen and calculate the fee."""
     quote = error = None
     status = 200
     form = request.form

@@ -16,6 +16,7 @@ FORCE_FAILURE_KEY = "mock_payment_force_failure"
 
 
 def force_failure_on(db):
+    """Return True if the admin has forced failures on."""
     row = db.execute("SELECT value FROM settings WHERE key = ?", (FORCE_FAILURE_KEY,)).fetchone()
     return bool(row and row["value"] == "1")
 
@@ -73,6 +74,7 @@ def process_payment(db, ticket_id):
 
 @bp.app_context_processor
 def inject_payment_mode():
+    """Give the dashboard the current payment mode."""
     return {"payment_force_failure": lambda: force_failure_on(get_db())}
 
 
@@ -81,6 +83,7 @@ def inject_payment_mode():
 @bp.post("/api/payment/mock")
 @login_required
 def api_pay():
+    """Take a mock payment through the JSON API."""
     data = request.get_json(silent=True) or request.form
     try:
         return jsonify(process_payment(get_db(), data.get("ticket_id") or ""))
@@ -91,6 +94,7 @@ def api_pay():
 @bp.post("/api/admin/payment-mode")
 @role_required("ADMIN")
 def api_payment_mode():
+    """Switch forced failure on or off through the API."""
     data = request.get_json(silent=True) or {}
     db = get_db()
     set_force_failure(db, bool(data.get("force_failure")), g.user["user_id"] if g.user else None)
@@ -102,6 +106,7 @@ def api_payment_mode():
 @bp.post("/pay")
 @login_required
 def pay_page():
+    """Take a mock payment and show the receipt."""
     ticket_id = request.form.get("ticket_id") or ""
     try:
         receipt = process_payment(get_db(), ticket_id)
@@ -118,5 +123,6 @@ def pay_page():
 @bp.post("/admin/payment-mode")
 @role_required("ADMIN")
 def payment_mode_page():
+    """Switch forced failure on or off from the dashboard."""
     set_force_failure(get_db(), request.form.get("force_failure") == "1", session.get("user_id"))
     return redirect(url_for("index"))

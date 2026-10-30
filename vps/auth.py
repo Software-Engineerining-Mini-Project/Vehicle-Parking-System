@@ -47,11 +47,13 @@ def load_logged_in_user():
 
 @bp.app_context_processor
 def inject_user():
+    """Make the logged-in user available to every template."""
     return {"current_user": g.get("user"), "role_labels": ROLE_LABELS}
 
 
 def _checks_disabled():
     # Lets the tests of other modules call routes without logging in first
+    """Return True when a test has switched login checks off."""
     return current_app.config.get("LOGIN_DISABLED", False)
 
 
