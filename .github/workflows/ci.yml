@@ -31,4 +31,4 @@ jobs:
         run: python -m flake8 .
 
       - name: Run tests
-        run: python -m pytest -v
+        run: python -m pytest -v --cov=vps --cov-branch --cov-report=term-missing
